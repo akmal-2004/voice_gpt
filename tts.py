@@ -1,7 +1,7 @@
 import torch
 import sounddevice as sd
 import time
-from num2t4ru import num2text
+from num2words import num2words
 
 language = 'ru'
 model_id = 'v3_1_ru' # ru_v3
@@ -23,10 +23,10 @@ model.to(device)
 def va_speak(what: str):
     print(what)
 
-    whatlist = what.replace(':', ' ').replace(',', ' ').replace('-', ' ').split()
+    whatlist = what.replace(':', ' ').replace(',', ' ').replace('-', ' ').replace('.', ' ').split()
     for i in whatlist:
         if i.isdigit():
-            what = what.replace(i, num2text(int(i)))
+            what = what.replace(i, num2words(int(i), lang='ru'))
 
     audio = model.apply_tts(text=what+"..",
                             speaker=speaker,
