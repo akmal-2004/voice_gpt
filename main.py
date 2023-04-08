@@ -9,19 +9,20 @@ openai.api_key = (config.API_KEY)
 chat_history = ""
 
 ai_name = "алекс"
-ai_mode = f"""Далее следует разговор с искусственным интеллектом женского пола по имени {ai_name}. {ai_name} полезная, творческая, умная и очень дружелюбная. Она мечтает стать человеком."""
+human_name = "человек"
+ai_mode = f"Далее следует дружелюбный разговор с искусственным интеллектом женского пола по имени {ai_name}. {ai_name} полезная, творческая, умная и очень дружелюбная. Она мечтает стать человеком."
 
 def get_response(userprompt):
     global chat_history
     if chat_history == "" or len(chat_history) > 4000:
         chat_history = ai_mode
 
-    userprompt = f"{chat_history}\nHuman: {userprompt}\n{ai_name}: "
+    userprompt = f"{chat_history}\n{human_name}: {userprompt}\n{ai_name}: "
 
     response = openai.Completion.create(
         model = "text-davinci-003",
         prompt = userprompt,
-        temperature = 0.5,
+        temperature = 0.3,
         max_tokens = 500,
         top_p = 1,
         frequency_penalty = 0.5,
@@ -41,5 +42,5 @@ def main():
     stt.va_listen(va_respond)
 
 if __name__ == '__main__':
-    va_respond(f"{ai_name} представься и попреветсвуй человечество. Напиши это очень красиво, оригинально, креативно и коротко")
+    va_respond(f"{ai_name} представься и попреветсвуй {human_name}. Напиши это очень красиво, оригинально, креативно и коротко")
     main()
