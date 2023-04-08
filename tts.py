@@ -2,6 +2,7 @@ import torch
 import sounddevice as sd
 import time
 from num2words import num2words
+import re
 
 language = 'ru'
 model_id = 'v3_1_ru' # ru_v3
@@ -21,22 +22,30 @@ model.to(device)
 
 
 def va_speak(what: str):
-    print(what)
+    try:
+        print(what)
 
-    whatlist = what.replace(':', ' ').replace(',', ' ').replace('-', ' ').replace('.', ' ').split()
-    for i in whatlist:
-        if i.isdigit():
-            what = what.replace(i, num2words(int(i), lang='ru'))
+        whatlist = what.replace(':', ' ').replace(',', ' ').replace('-', ' ').replace('.', ' ').split()
 
-    audio = model.apply_tts(text=what+"..",
-                            speaker=speaker,
-                            sample_rate=sample_rate,
-                            put_accent=put_accent,
-                            put_yo=put_yo)
+        for i in whatlist:
+            if i.isdigit():
+                what = what.replace(i, num2words(int(i), lang='ru'))
 
-    sd.play(audio, sample_rate * 1.05)
-    time.sleep((len(audio) / sample_rate) + 0.5)
-    sd.stop()
+            if not bool(re.search('[а-яА-Я]', i)):
+                what = what.replace(i, "")
+
+
+        audio = model.apply_tts(text=what+"..",
+                                speaker=speaker,
+                                sample_rate=sample_rate,
+                                put_accent=put_accent,
+                                put_yo=put_yo)
+
+        sd.play(audio, sample_rate * 1.05)
+        time.sleep((len(audio) / sample_rate) + 0.5)
+        sd.stop()
+    except Exception as e:
+        print(e)
 
 # sd.play(audio, sample_rate)
 # time.sleep(len(audio) / sample_rate)
