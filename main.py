@@ -23,13 +23,12 @@ def get_response(prompt):
 def va_respond(voice: str):
     if 'алекс' in voice:
         voice = voice.replace('алекс', "").strip()
-        response = get_response(voice)
-        tts.va_speak(response)
+        tts.va_speak(get_response(voice))
 
 
 def main():
     stt.va_listen(va_respond)
 
 if __name__ == '__main__':
-    va_respond("алекс попреветствуй людей как герой киновселенной - искусственный интеллект. Это должно звучать красиво, умно, креативно, мотивирующе и коротко.")
+    va_respond("алекс представься как женский род и попреветсвуй человечество как настоящий искусственный интеллект по имени Алекс. Напиши это очень красиво, оригинально, креативно и коротко")
     main()
