@@ -6,28 +6,40 @@ import tts
 
 openai.api_key = (config.API_KEY)
 
-def get_response(prompt):
+chat_history = ""
+
+ai_name = "алекс"
+ai_mode = f"""Далее следует разговор с искусственным интеллектом женского пола по имени {ai_name}. {ai_name} полезная, творческая, умная и очень дружелюбная. Она мечтает стать человеком."""
+
+def get_response(userprompt):
+    global chat_history
+    if chat_history == "" or len(chat_history) > 4000:
+        chat_history = ai_mode
+
+    userprompt = f"{chat_history}\nHuman: {userprompt}\n{ai_name}: "
+
     response = openai.Completion.create(
         model = "text-davinci-003",
-        # prompt = "I am a highly intelligent question answering bot. If you ask me a question that is rooted in truth, I will give you the answer. If you ask me a question that is nonsense, trickery, or has no clear answer, I will respond with \"Unknown\".\n\nQ: What is human life expectancy in the United States?\nA: Human life expectancy in the United States is 78 years.\n\nQ: Who was president of the United States in 1955?\nA: Dwight D. Eisenhower was president of the United States in 1955.\n\nQ: Which party did he belong to?\nA: He belonged to the Republican Party.\n\nQ: What is the square root of banana?\nA: Unknown\n\nQ: How does a telescope work?\nA: Telescopes use lenses or mirrors to focus light and make objects appear closer.\n\nQ: Where were the 1992 Olympics held?\nA: The 1992 Olympics were held in Barcelona, Spain.\n\nQ: How many squigs are in a bonk?\nA: Unknown\n\nQ: Where is the Valley of Kings?\nA:",
-        prompt = "The following is a conversation with an AI assistant in russian (using werbs like woman). The assistant is helpful, creative, clever, and very friendly, with name Alex.\nHuman: " + prompt + "\nAI: ",
-        temperature = 0.8,
+        prompt = userprompt,
+        temperature = 0.5,
         max_tokens = 500,
         top_p = 1,
-        frequency_penalty = 0.0,
-        presence_penalty = 0.6,
-        stop=["AI:"]
+        frequency_penalty = 0.5,
+        presence_penalty = 0.0,
+        stop = [f"{ai_name}: "]
     )
-    return response.choices[0].text
+    chat_history = f"{userprompt}{response.choices[0].text.strip()}"
+    return response.choices[0].text.strip()
 
 def va_respond(voice: str):
-    if 'алекс' in voice:
-        voice = voice.replace('алекс', "").strip()
+    if ai_name in voice:
+        voice = voice.replace(ai_name, "").strip()
         tts.va_speak(get_response(voice))
+        print(chat_history)
 
 def main():
     stt.va_listen(va_respond)
 
 if __name__ == '__main__':
-    va_respond("алекс представься как женский род и попреветсвуй человечество как настоящий искусственный интеллект по имени Алекс. Напиши это очень красиво, оригинально, креативно и коротко")
+    va_respond(f"{ai_name} представься и попреветсвуй человечество. Напиши это очень красиво, оригинально, креативно и коротко")
     main()
