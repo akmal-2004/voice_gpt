@@ -1,34 +1,50 @@
 import openai
-
 import config
 import stt
 import tts
 
-openai.api_key = (config.API_KEY)
+openai.api_key = config.API_KEY
 
 chat_history = ""
 
 ai_name = "алекс"
 human_name = "человек"
-ai_mode = f"Далее следует дружелюбный разговор с искусственным интеллектом женского пола по имени {ai_name}. {ai_name} полезная, творческая, умная и очень дружелюбная. Она мечтает стать человеком."
+ai_mode = f"Притворись что ты ассистент женского пола по имени {ai_name}. Продолжи разговор. Ты очень полезная, творческая, умная, дружелюбная и ты готова на всё что-бы помочь {human_name}."
 
 def get_response(userprompt):
-    global chat_history
-    if chat_history == "" or len(chat_history) > 4000:
+    global chat_history, openai
+    if chat_history == "" or len(chat_history) > (4116 - 400): # max 4116
         chat_history = ai_mode
 
     userprompt = f"{chat_history}\n{human_name}: {userprompt}\n{ai_name}: "
+    try:
+        response = openai.Completion.create(
+            model = "text-davinci-003",
+            prompt = userprompt,
+            temperature = 0.5,
+            max_tokens = 400,
+            top_p = 1,
+            frequency_penalty = 0.5,
+            presence_penalty = 0.0,
+            stop = [f"{ai_name}: "]
+        )
+    except Exception as e:
+        print(e)
+        tts.va_speak("Ошибка. Перезагружаю подключение.")
+        del openai
+        import openai
+        openai.api_key = config.API_KEY
+        response = openai.Completion.create(
+            model = "text-davinci-003",
+            prompt = userprompt,
+            temperature = 0.5,
+            max_tokens = 500,
+            top_p = 1,
+            frequency_penalty = 0.5,
+            presence_penalty = 0.0,
+            stop = [f"{ai_name}: "]
+        )
 
-    response = openai.Completion.create(
-        model = "text-davinci-003",
-        prompt = userprompt,
-        temperature = 0.3,
-        max_tokens = 500,
-        top_p = 1,
-        frequency_penalty = 0.5,
-        presence_penalty = 0.0,
-        stop = [f"{ai_name}: "]
-    )
     chat_history = f"{userprompt}{response.choices[0].text.strip()}"
     return response.choices[0].text.strip()
 
